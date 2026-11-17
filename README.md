@@ -14,6 +14,14 @@ sampler nodes.
 
 ![node](https://img.shields.io/badge/ComfyUI-custom_node-blue)
 
+## Live output values
+
+Every output dot shows its current value next to its name (e.g. `width: 320`,
+`height_1: 608`). The labels update live whenever an `asp`, `megapixels` or
+`multiple` widget changes, when a workflow is loaded, and again at execution time.
+This is done by a small frontend extension in `web/` (loaded automatically via
+`WEB_DIRECTORY`); the resolution math is mirrored in `web/resolution_math.mjs`.
+
 ## Magik Resolution Selector
 
 ### Widgets
@@ -170,7 +178,16 @@ and extract it (or drag it onto ComfyUI Manager's "Install from file"), then res
 The three nodes appear under **Add Node → Magik → Magik Resolution Selector**,
 **Add Node → Magik → Magik Two Resolutions Selector** and
 **Add Node → Magik → Magik Three Resolutions Selector**.
-No third-party dependencies are required.
+No third-party dependencies are required. The `web/` extension that renders the
+live output-value labels loads automatically — no extra setup.
+
+## Development
+
+The JS mirror of the resolution math is parity-tested against the README examples:
+
+```
+node --test
+```
 
 ## Usage tips
 
