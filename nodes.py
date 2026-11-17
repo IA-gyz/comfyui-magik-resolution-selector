@@ -1,10 +1,14 @@
 """Magik Resolution Selector — ComfyUI custom node pack.
 
-Contains two nodes:
-  * MagikResolutionSelector       -> outputs (width, height)
-  * MagikTwoResolutionsSelector   -> outputs (width_1, height_1, width_2, height_2)
-                                     with two independently configured resolutions
-                                     sharing one aspect-ratio preset.
+Contains three nodes:
+  * MagikResolutionSelector         -> outputs (width, height)
+  * MagikTwoResolutionsSelector     -> outputs (width_1, height_1, width_2, height_2)
+                                       with two independently configured resolutions
+                                       sharing one aspect-ratio preset.
+  * MagikThreeResolutionsSelector   -> outputs (width_1, height_1, width_2, height_2,
+                                       width_3, height_3) with three independently
+                                       configured resolutions sharing one
+                                       aspect-ratio preset.
 
 Each node derives its resolution pair(s) from:
   * an aspect-ratio preset (asp),
@@ -211,12 +215,125 @@ class MagikTwoResolutionsSelector:
         return (width_1, height_1, width_2, height_2)
 
 
+class MagikThreeResolutionsSelector:
+    """Merge of three Magik Resolution Selectors sharing the same aspect-ratio preset.
+
+    Resolutions 1, 2 and 3 (megapixels_N / multiple_N) are configured
+    independently, so one node can drive three stages of a workflow (e.g. a
+    low-res draft latent, a mid-res refiner latent and a high-res final
+    latent) with identical framing.
+    """
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "asp": (
+                    ASPECT_RATIOS,
+                    {
+                        "default": DEFAULT_ASPECT_RATIO,
+                        "tooltip": "Aspect-ratio preset (width:height) shared by ALL THREE output resolutions.",
+                    },
+                ),
+                "megapixels_1": (
+                    "FLOAT",
+                    {
+                        "default": DEFAULT_MEGAPIXELS,
+                        "min": 0.01,
+                        "max": 16.0,
+                        "step": 0.01,
+                        "display": "number",
+                        "tooltip": "Resolution 1: target total pixel count (width_1 x height_1) in megapixels.",
+                    },
+                ),
+                "multiple_1": (
+                    "INT",
+                    {
+                        "default": DEFAULT_MULTIPLE,
+                        "min": 1,
+                        "max": 512,
+                        "step": 1,
+                        "display": "number",
+                        "tooltip": "Resolution 1: width_1 and height_1 are snapped to the nearest multiple of this value.",
+                    },
+                ),
+                "megapixels_2": (
+                    "FLOAT",
+                    {
+                        "default": DEFAULT_MEGAPIXELS,
+                        "min": 0.01,
+                        "max": 16.0,
+                        "step": 0.01,
+                        "display": "number",
+                        "tooltip": "Resolution 2: target total pixel count (width_2 x height_2) in megapixels.",
+                    },
+                ),
+                "multiple_2": (
+                    "INT",
+                    {
+                        "default": DEFAULT_MULTIPLE,
+                        "min": 1,
+                        "max": 512,
+                        "step": 1,
+                        "display": "number",
+                        "tooltip": "Resolution 2: width_2 and height_2 are snapped to the nearest multiple of this value.",
+                    },
+                ),
+                "megapixels_3": (
+                    "FLOAT",
+                    {
+                        "default": DEFAULT_MEGAPIXELS,
+                        "min": 0.01,
+                        "max": 16.0,
+                        "step": 0.01,
+                        "display": "number",
+                        "tooltip": "Resolution 3: target total pixel count (width_3 x height_3) in megapixels.",
+                    },
+                ),
+                "multiple_3": (
+                    "INT",
+                    {
+                        "default": DEFAULT_MULTIPLE,
+                        "min": 1,
+                        "max": 512,
+                        "step": 1,
+                        "display": "number",
+                        "tooltip": "Resolution 3: width_3 and height_3 are snapped to the nearest multiple of this value.",
+                    },
+                ),
+            }
+        }
+
+    RETURN_TYPES = ("INT", "INT", "INT", "INT", "INT", "INT")
+    RETURN_NAMES = ("width_1", "height_1", "width_2", "height_2", "width_3", "height_3")
+    FUNCTION = "select"
+    CATEGORY = "Magik"
+    DESCRIPTION = (
+        "Merge of three resolution selectors sharing the same aspect-ratio preset. "
+        "Each resolution has its own megapixels and multiple; outputs six INTs: "
+        "width_1, height_1, width_2, height_2, width_3, height_3."
+    )
+
+    def select(self, asp: str, megapixels_1: float, multiple_1: int,
+               megapixels_2: float, multiple_2: int,
+               megapixels_3: float, multiple_3: int):
+        width_1, height_1 = MagikResolutionSelector.compute_resolution(
+            asp, megapixels_1, multiple_1)
+        width_2, height_2 = MagikResolutionSelector.compute_resolution(
+            asp, megapixels_2, multiple_2)
+        width_3, height_3 = MagikResolutionSelector.compute_resolution(
+            asp, megapixels_3, multiple_3)
+        return (width_1, height_1, width_2, height_2, width_3, height_3)
+
+
 NODE_CLASS_MAPPINGS = {
     "MagikResolutionSelector": MagikResolutionSelector,
     "MagikTwoResolutionsSelector": MagikTwoResolutionsSelector,
+    "MagikThreeResolutionsSelector": MagikThreeResolutionsSelector,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "MagikResolutionSelector": "Magik Resolution Selector",
     "MagikTwoResolutionsSelector": "Magik Two Resolutions Selector",
+    "MagikThreeResolutionsSelector": "Magik Three Resolutions Selector",
 }
