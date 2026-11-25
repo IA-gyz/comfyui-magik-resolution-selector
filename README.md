@@ -22,6 +22,16 @@ Every output dot shows its current value next to its name (e.g. `width: 320`,
 This is done by a small frontend extension in `web/` (loaded automatically via
 `WEB_DIRECTORY`); the resolution math is mirrored in `web/resolution_math.mjs`.
 
+## Aspect-ratio preview
+
+Each node also draws a small preview strip at its bottom: one rectangle per
+resolution, shaped exactly like the selected `asp` preset and captioned with its
+snapped `W×H` (e.g. `320×608`). In the two- and three-resolution nodes the
+rectangles are scaled relative to each other by their megapixel targets, so a
+quick glance shows both the framing and which stage is the largest. The preview
+updates live on every widget change, on workflow load and at execution time.
+Implemented in `web/resolution_aspect_preview.js`.
+
 ## Magik Resolution Selector
 
 ### Widgets
