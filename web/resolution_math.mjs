@@ -45,3 +45,14 @@ export function computeResolution(asp, megapixels, multiple) {
   const height = Math.max(m, pyRound(heightIdeal / m) * m);
   return [width, height];
 }
+
+export function fitAspectRect(w, h, boxW, boxH) {
+  const ratio = w / h;
+  let rw = boxW;
+  let rh = rw / ratio;
+  if (rh > boxH) {
+    rh = boxH;
+    rw = rh * ratio;
+  }
+  return [rw, rh];
+}
